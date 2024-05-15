@@ -29,9 +29,9 @@ export default async function Page({
         <Search placeholder="Search recipes..." />
         <CreateRecipe />
       </div>
-      <Suspense key={query + currentPage} fallback={<RecipesGridSkeleton />}>
+      {/* <Suspense key={query + currentPage} fallback={<RecipesGridSkeleton />}>
         <Table query={query} currentPage={currentPage} />
-      </Suspense>
+      </Suspense> */}
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>
