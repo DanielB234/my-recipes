@@ -117,3 +117,20 @@ async function seedInstructions(client) {
         throw error;
     }
 }
+
+async function main() {
+    const client = await db.connect();
+  
+    await seedRecipes(client);
+    await seedIngredients(client);
+    await seedInstructions(client);
+  
+    await client.end();
+  }
+  
+  main().catch((err) => {
+    console.error(
+      'An error occurred while attempting to seed the database:',
+      err,
+    );
+  });

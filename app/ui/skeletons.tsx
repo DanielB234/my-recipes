@@ -8,3 +8,7 @@ const shimmer =
       </>
     );
   }
+
+export function RecipesGridSkeleton() {
+
+}

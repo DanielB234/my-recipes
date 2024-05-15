@@ -2,18 +2,14 @@
 // It describes the shape of the data, and what data type each property should accept.
 // For simplicity of teaching, we're manually defining these types.
 // However, these types are generated automatically if you're using an ORM such as Prisma.
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-};
 
 export type Recipe = {
   id: string;
   name: string;
-  serving: 'Serves' | 'Makes';
+  serving: 'Serves' | 'Makes' | 'Yield';
   serving_amount: string;
+  preparation_time: string;
+  cook_time: string;
   image_url: string;
 };
 
@@ -25,7 +21,7 @@ export type LatestRecipe = {
   image_url: string;
 };
 
-export type RecipesTable = {
+export type RecipesGrid = {
   id: string;
   name: string;
   serving: 'Serves' | 'Makes';
@@ -33,63 +29,24 @@ export type RecipesTable = {
   image_url: string;
 };
 
-export type Revenue = {
-  month: string;
-  revenue: number;
-};
-
-export type LatestInvoice = {
+export type RecipeForm = {
   id: string;
   name: string;
+  serving: 'Serves' | 'Makes' | 'Yield';
+  serving_amount: string;
+  preparation_time: string;
+  cook_time: string;
   image_url: string;
-  email: string;
-  amount: string;
 };
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, 'amount'> & {
+export type IngredientsTable = {
+  id: string;
+  name: string;
   amount: number;
-};
+  unit: string;
+}
 
-export type InvoicesTable = {
-  id: string;
-  customer_id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  date: string;
-  amount: number;
-  status: 'pending' | 'paid';
-};
 
-export type CustomersTableType = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: number;
-  total_paid: number;
-};
 
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: string;
-  total_paid: string;
-};
 
-export type CustomerField = {
-  id: string;
-  name: string;
-};
 
-export type InvoiceForm = {
-  id: string;
-  customer_id: string;
-  amount: number;
-  status: 'pending' | 'paid';
-};
