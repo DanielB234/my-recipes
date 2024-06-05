@@ -1,11 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
+import { InstructionsTable } from './definitions';
 
-
-export const formatCurrency = (amount: number) => {
-  return (amount / 100).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  });
-};
 
 export const formatDateToLocal = (
   dateStr: string,
@@ -21,19 +16,55 @@ export const formatDateToLocal = (
   return formatter.format(date);
 };
 
-// export const generateYAxis = (revenue: Revenue[]) => {
-//   // Calculate what labels we need to display on the y-axis
-//   // based on highest record and in 1000s
-//   const yAxisLabels = [];
-//   const highestRecord = Math.max(...revenue.map((month) => month.revenue));
-//   const topLabel = Math.ceil(highestRecord / 1000) * 1000;
+export function amountUpperBoundary(n: number, modifier: number): string {
+  if (n == undefined || n == 0) {
+    return "";
+  } else return "- " + numberToFractionString(n * modifier) + "";
+}
+const acceptableDenominators = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const maxDistanceToNumerator = 0.0001;
 
-//   for (let i = topLabel; i >= 0; i -= 1000) {
-//     yAxisLabels.push(`$${i / 1000}K`);
-//   }
+export function numberToFractionString(n: number): string {
+  if (n == undefined) {
+    return "";
+  }
+  if (n == 0) {
+    return ""
+  }
+  const negative = (n < 0);
+  if (negative) n = -n;
 
-//   return { yAxisLabels, topLabel };
-// };
+  const wholePart = Math.floor(n);
+  n -= wholePart;
+  const denom = acceptableDenominators.find(d =>
+    Math.abs(d * n - Math.round(d * n)) <= maxDistanceToNumerator
+  );
+
+  if (typeof denom === 'undefined') {
+    return (Math.round(n * 100) / 100) + wholePart + " ";
+  }
+  const numer = Math.round(denom * n);
+
+
+  if (denom === 1) {
+
+    return "" + (wholePart + numer) * (negative ? -1 : 1) + " ";
+  }
+
+  return (negative ? "-" : "") +
+    (wholePart ? wholePart + " " : "") +
+    numer + "/" + denom + " ";
+
+}
+
+export function spaceIfExists(s: string): string {
+  if (s == "") {
+    return ""
+  } else {
+    return s + " "
+  }
+}
+
 
 export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the total number of pages is 7 or less,
@@ -67,3 +98,61 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+export function getInstructionSet(id: string, list_reference: string, formData: FormData): 
+[InstructionsTable[], InstructionsTable[], InstructionsTable[], string, string] {
+  let deleteSets = []
+  let createSets = []
+  let updateSets = []
+  let name = ""
+  console.log(formData)
+  const contextPattern = new RegExp(/context-(\d+)-(.*)/);
+  const deletePattern = new RegExp(/deleted-(\d+)/)
+  let context = null
+  let deleteContext = null
+  console.log("prevalidate")
+  for (let [key, val] of formData.entries()) {
+    context = contextPattern.exec(key)
+    console.log(key,val)
+    let value = val as string
+    if (context == null) {
+      deleteContext = deletePattern.exec(key)
+      if (deleteContext == null) {
+        if (key == 'name') {
+          name = value
+          if (list_reference == '0') {
+            list_reference = uuidv4()
+          }
+        }
+      } else {
+        deleteSets.push({
+            id: '0',
+            context: '',
+            position: parseInt(deleteContext[1]),
+            list_reference: list_reference,
+            recipe_id: id
+          })
+      }
+    } else {
+      if (context[2] == '0') {
+        createSets.push({
+          id: uuidv4(),
+          context: value,
+          position: parseInt(context[1]),
+          list_reference: list_reference,
+          recipe_id: id
+        })
+      } else {
+        updateSets.push({
+          id: context[2],
+          context: value,
+          position: parseInt(context[1]),
+          list_reference: list_reference,
+          recipe_id: id
+        })
+      }
+    }
+  }
+  return [deleteSets, updateSets, createSets, name, list_reference]
+
+}

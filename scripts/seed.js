@@ -1,9 +1,7 @@
 const { db } = require('@vercel/postgres');
 const {
-    recipes,
-    ingredients,
-    instructions,
-    users,
+    measurements,
+    measurement_perms
 } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
 
@@ -13,32 +11,21 @@ async function seedRecipes(client) {
         const createTable = await client.sql`
             CREATE TABLE IF NOT EXISTS recipes (
                 id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                name: VARCHAR(255) NOT NULL,
-                serving: INT,
-                serving_amount: DOUBLE(4,2),
-                serving_units: VARCHAR(64),
-                preparation_time: VARCHAR(64),
-                cook_time: VARCHAR(64),
-                image_url: VARCHAR(255)
+                name VARCHAR(255) NOT NULL,
+                serving VARCHAR(64),
+                serving_amount FLOAT(4),
+                serving_units VARCHAR(64),
+                preparation_time VARCHAR(64),
+                cook_time VARCHAR(64),
+                date DATE NOT NULL,
+                modifier FLOAT(4) NOT NULL DEFAULT 1,
+                image_url VARCHAR(255),
+                todo_list BOOL NOT NULL
             );
         `;
         console.log(`Created 'recipes' table`);
-
-        const insertedRecipes = await Promise.all(
-            recipes.map(
-                (recipes) => client.sql`
-                INSERT INTO recipes (id, name, serving, serving_amount, serving_units, preparation_time, cook_time, image_url)
-                VALUES (${recipes.id}, ${recipes.name}, ${recipes.serving}, ${recipes.serving_amount}, ${recipes.serving_units}, ${recipes.preparation_time}, ${recipes.preparation_time}, ${recipes.image_url})
-                ON CONFLICT (id) DO NOTHING;
-            `,
-            ),
-        );
-
-        console.log(`Seeded ${insertedRecipes.length} recipes`);
-
         return {
             createTable,
-            recipes: insertedRecipes,
         };
     } catch (error) {
         console.error('Error seeding recipes:', error);
@@ -52,30 +39,19 @@ async function seedIngredients(client) {
         const createTable = await client.sql`
             CREATE TABLE IF NOT EXISTS ingredients (
                 id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                name: VARCHAR(255) NOT NULL,
-                name_full: VARCHAR(255),
-                amount: DOUBLE(4,2),
-                units: VARCHAR(64),
-                recipe_id uuid FOREIGN KEY REFERENCES recipes(id)
+                name VARCHAR(255) NOT NULL,
+                name_full VARCHAR(255),
+                amount FLOAT(4),
+                amount_upper FLOAT(4),
+                units VARCHAR(64),
+                shopping_list BOOL NOT NULL,
+                list_reference UUID NOT NULL REFERENCES list_references(id),
+                recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE
             );
         `;
         console.log(`Created 'ingredients' table`);
-
-        const insertedIngredients = await Promise.all(
-            ingredients.map(
-                (ingredients) => client.sql`
-                INSERT INTO ingredients (id, name, name_full, amount, units, recipe_id)
-                VALUES (${ingredients.id}, ${ingredients.name}, ${ingredients.name_full}, ${ingredients.amount}, ${ingredients.units}, ${ingredients.recipe_id})
-                ON CONFLICT (id) DO NOTHING;
-            `,
-            ),
-        );
-
-        console.log(`Seeded ${insertedIngredients.length} ingredients`);
-
         return {
             createTable,
-            ingredients: insertedIngredients,
         };
     } catch (error) {
         console.error('Error seeding ingredients:', error);
@@ -89,28 +65,17 @@ async function seedInstructions(client) {
         const createTable = await client.sql`
             CREATE TABLE IF NOT EXISTS instructions (
                 id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                position: INT NOT NULL,
-                context: VARCHAR(1024) NOT NULL,
-                recipe_id uuid FOREIGN KEY REFERENCES recipes(id)
+                position INT NOT NULL,
+                context VARCHAR(1024) NOT NULL,
+                list_reference UUID NOT NULL REFERENCES list_references(id) ON DELETE CASCADE,
+                recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE
             );
         `;
         console.log(`Created 'instructions' table`);
 
-        const insertedInstructions = await Promise.all(
-            instructions.map(
-                (instructions) => client.sql`
-                INSERT INTO instructions (id, position, context, recipe_id)
-                VALUES (${instructions.id}, ${instructions.position}, ${instructions.context},  ${instructions.recipe_id})
-                ON CONFLICT (id) DO NOTHING;
-            `,
-            ),
-        );
-
-        console.log(`Seeded ${insertedInstructions.length} instructions`);
 
         return {
             createTable,
-            instructions: insertedInstructions,
         };
     } catch (error) {
         console.error('Error seeding instructions:', error);
@@ -118,13 +83,105 @@ async function seedInstructions(client) {
     }
 }
 
+async function seedListReferences(client) {
+    try {
+        await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+        const createTable = await client.sql`
+            CREATE TABLE IF NOT EXISTS list_references (
+                id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                name VARCHAR(255) NOT NULL DEFAULT '0',
+                word_coefficient FLOAT(4),
+                position INT NOT NULL,
+                recipe_id UUID NOT NULL
+            );
+        `;
+        console.log(`Created 'list_references' table`);
+        return {
+            createTable,
+        };
+    } catch (error) {
+        console.error('Error seeding list_references:', error);
+        throw error;
+    }
+}
+
+async function seedMeasurements(client) {
+    try {
+        await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+        const createTable = await client.sql`
+            CREATE TABLE IF NOT EXISTS measurements (
+                id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                name VARCHAR(64) NOT NULL
+            );
+        `;
+        console.log(`Created 'measurements' table`);
+
+        const insertedMeasurements = await Promise.all(
+            measurements.map(
+                (measurements) => client.sql`
+                INSERT INTO measurements (id, name)
+                VALUES (${measurements.id}, ${measurements.name})
+                ON CONFLICT (id) DO NOTHING;
+            `,
+            ),
+        );
+
+        console.log(`Seeded ${insertedMeasurements.length} measurements`);
+
+        return {
+            createTable,
+            measurements: insertedMeasurements,
+        };
+    } catch (error) {
+        console.error('Error seeding measurements:', error);
+        throw error;
+    }
+}
+
+async function seedMeasurementPerms(client) {
+    try {
+        await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+        const createTable = await client.sql`
+            CREATE TABLE IF NOT EXISTS measurement_perms (
+                id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                name VARCHAR(64) NOT NULL,
+                measurement UUID REFERENCES measurements(id)
+            );
+        `;
+        console.log(`Created 'measurement_perms' table`);
+
+        const insertedInstructionPerms = await Promise.all(
+            measurement_perms.map(
+                (measurement_perms) => client.sql`
+                INSERT INTO measurement_perms (id, name, measurement)
+                VALUES (${measurement_perms.id}, ${measurement_perms.name}, ${measurement_perms.measurement})
+                ON CONFLICT (id) DO NOTHING;
+            `,
+            ),
+        );
+
+        console.log(`Seeded ${insertedInstructionPerms.length} measurement_perms`);
+
+        return {
+            createTable,
+            measurement_perms: insertedInstructionPerms,
+        };
+    } catch (error) {
+        console.error('Error seeding measurement_perms:', error);
+        throw error;
+    }
+}
+
+
+
 async function main() {
     const client = await db.connect();
-  
     await seedRecipes(client);
     await seedIngredients(client);
     await seedInstructions(client);
-  
+    await seedListReferences(client);
+    await seedMeasurements(client); 
+    await seedMeasurementPerms(client);  
     await client.end();
   }
   

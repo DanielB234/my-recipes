@@ -1,32 +1,42 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
-
 export type Recipe = {
   id: string;
   name: string;
-  serving: 'Serves' | 'Makes' | 'Yield';
+  serving: string;
   serving_amount: string;
+  serving_units: string;
   preparation_time: string;
   cook_time: string;
+  date: string;
   image_url: string;
+  todo_list: string;
+  modifier: number;
 };
 
-export type LatestRecipe = {
+
+export type ScheduledRecipe = {
   id: string;
   name: string;
-  serving: 'Serves' | 'Makes';
+  serving: string;
   serving_amount: string;
-  image_url: string;
+  serving_units: string;
+};
+
+export type ShoppingList = {
+  id: string;
+  ingredient_name: string;
+  recipe_name: string;
 };
 
 export type RecipesGrid = {
   id: string;
   name: string;
-  serving: 'Serves' | 'Makes';
-  serving_amount: string;
+  serving: string;
+  serving_amount: number;
+  serving_units: string;
   image_url: string;
+  preparation_time: string;
+  cook_time: string;
+  date: string;
 };
 
 export type RecipeForm = {
@@ -39,13 +49,47 @@ export type RecipeForm = {
   image_url: string;
 };
 
+export type RecipeImage = {
+  id: string;
+};
+
 export type IngredientsTable = {
   id: string;
   name: string;
   amount: number;
-  unit: string;
+  units: string;
+  amount_upper: number;
+  recipe_id: string;
+  list_reference: string;
+  shopping_list: boolean;
 }
 
+export type IngredientsHeader = {
+  recipe_id: string
+  name: string;
+  list_reference: string;
+  ingredients_table: IngredientsTable[];
+}
+
+export type InstructionsHeader = {
+  recipe_id: string;
+  name: string;
+  list_reference: string;
+  instructions_table: InstructionsTable[];
+}
+export type InstructionsTable = {
+  id: string;
+  context: string;
+  position: number;
+  recipe_id: string; 
+  list_reference: string;
+}
+
+export type State = {
+  items: InstructionsTable[];
+  draggingItem?: InstructionsTable;
+  newItemName: string;
+} 
 
 
 
