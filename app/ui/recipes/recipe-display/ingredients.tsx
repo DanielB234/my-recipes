@@ -20,7 +20,7 @@ export default function Ingredients({
         modifier: number, 
         recipe_id: string}) {
     const [adding, setAdding] = useState(false)
-    const [newIngredientSet, setNewIngredientSet] = useState<IngredientsHeader>(null);
+    const [newIngredientSet, setNewIngredientSet] = useState<IngredientsHeader>(names[0]);
     const [shopping, setShopping] = useState(false)
     let ingredientSets = names
     const addNewIngredientSet = () => {
@@ -56,7 +56,7 @@ export default function Ingredients({
                     }
                 </div>
                 {ingredientSets?.map((ingredientSet) => (
-                    <IngredientsBySection name={ingredientSet} ingredients={ingredientSet.ingredients_table} modifier={modifier} recipe_id={recipe_id} shopping={shopping} ingredientSets={ingredientSets}/>
+                    <IngredientsBySection key={ingredientSet.list_reference} name={ingredientSet} ingredients={ingredientSet.ingredients_table} modifier={modifier} recipe_id={recipe_id} shopping={shopping} ingredientSets={ingredientSets}/>
                 ))}
 
                 {adding ?
@@ -131,7 +131,7 @@ export function IngredientsBySection({
         const separateLines = newContext.split(/\r?\n|\r|\n/g);
         separateLines.forEach(element => {
             const newIngredient = {
-                id: '0',
+                id: String(0-ingredientSet.length),
                 amount: 0,
                 amount_upper: 0,
                 units: "",
@@ -150,8 +150,8 @@ export function IngredientsBySection({
         })
     };
 
-    const onHandleSubmit = (e) => {
-
+    const onHandleSubmit = (e: any) => {
+        console.log(new FormData(e.target))
         e.preventDefault();
         updateIngredientSetWithId(new FormData(e.target)).then(res => console.log("test")).then(
                 resp => setEditing(false))
@@ -177,7 +177,7 @@ export function IngredientsBySection({
                     <ul className="min-w-0 list-disc">
                         {ingredientSet.length ? ingredientSet?.map((ingredient, index) => (
                             <div key={ingredient.id}>
-                                <IngredientIndividualEdit ingredient={ingredient} index={index + 1} modifier={modifier} />
+                                <IngredientIndividualEdit ingredient={ingredient} modifier={modifier} />
                             </div>
 
                         )) : <></>}
@@ -248,7 +248,7 @@ export function IngredientsBySection({
 
                             <ul key="ingredient-display" className="w-full list-disc">
                                 {ingredientSet?.map((ingredient) => (
-                                    <IngredientIndividualDisplay ingredient={ingredient} modifier={modifier} shopping={shopping}/>
+                                    <IngredientIndividualDisplay key={ingredient.id} ingredient={ingredient} modifier={modifier} shopping={shopping}/>
 
                                 ))}
                             </ul>
@@ -257,7 +257,7 @@ export function IngredientsBySection({
 
                             <ul key="ingredient-display" className="w-full list-disc">
                                 {ingredientSet?.map((ingredient) => (
-                                    <IngredientIndividualDisplay ingredient={ingredient} modifier={modifier} shopping={shopping}/>
+                                    <IngredientIndividualDisplay key={ingredient.id} ingredient={ingredient} modifier={modifier} shopping={shopping}/>
 
                                 ))}
                             </ul>

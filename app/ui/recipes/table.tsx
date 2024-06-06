@@ -19,13 +19,15 @@ export default async function RecipesTable({
           </div>
           <div className="grid gap-6 min-h-1000 sm:grid-cols-2 lg:grid-cols-3 ">
             {recipes?.map((recipe) => (
-              <Link href={`/dashboard/recipes/${recipe.id}`} className="rounded-x1 border-2 border-slate-200 hover:bg-slate-200 bg-slate-50 p-2 shadow-sm rounded-lg min-h-[415px]">
+              <Link key={recipe.id} href={`/dashboard/recipes/${recipe.id}`} className="rounded-x1 border-2 border-slate-200 hover:bg-slate-200 bg-slate-50 p-2 shadow-sm rounded-lg min-h-[415px]">
                 <div className='h-1/2 w-full rounded-lg relative '>
                   <Image
                     src={`${recipe.image_url}`}
                     sizes='200'
-                    layout='fill'
-                    objectFit='contain'
+                    // layout='fill'
+                    // objectFit='contain'
+                    width={350}
+                    height={350}
                     className='rounded-lg'
                     alt={`${recipe.name}'s profile picture`}
                   /></div>

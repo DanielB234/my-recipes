@@ -17,7 +17,7 @@ export default function Instructions({
         recipe_id: string 
     }) {
     const [adding, setAdding] = useState(false)
-    const [newInstructionSet, setNewInstructionSet] = useState<InstructionsHeader>(null);
+    const [newInstructionSet, setNewInstructionSet] = useState<InstructionsHeader>(names[0]);
     let instructionSets = names
     // setInstructionSets(names)
     const addNewInstructionSet = () => {
@@ -43,7 +43,7 @@ export default function Instructions({
                     Instructions:
                 </p>
                 {instructionSets?.map((instructionSet) => (
-                    <InstructionsBySection name={instructionSet} instructions={instructionSet.instructions_table} recipe_id={recipe_id}  instructionSets={instructionSets}/>
+                    <InstructionsBySection key={instructionSet.list_reference} name={instructionSet} instructions={instructionSet.instructions_table} recipe_id={recipe_id}  instructionSets={instructionSets}/>
                 ))}
 
                 {adding ?
@@ -170,9 +170,8 @@ export function InstructionsBySection({
         })
     };
 
-    const onHandleSubmit = (e) => {
+    const onHandleSubmit = (e: any) => {
         const [deleteSets, updateSets, createSets, new_name, new_list_reference] = getInstructionSet(recipe_id, name.list_reference, new FormData(e.target))
-        console.log(instructionSet)
         e.preventDefault();
         updateInstructionSetWithId(recipe_id, new_name, new_list_reference, deleteSets, updateSets, createSets, name.list_reference==='0').then(res => setEditing(false))
         // .then(resp => setInstructionSet(updateSets.concat(createSets))).then(res => setInstructionSetName(new_name))
@@ -198,7 +197,8 @@ export function InstructionsBySection({
                     </div>
                     <ol className="min-w-0 list-decimal">
                         {instructionSet.length ? instructionSet?.map((instruction, index) => (
-                            <div draggable="true"
+                            <div key={instruction.id} 
+                                draggable="true"
                                 id={instruction.id}
                                 className=
                                 {`instruction ${instruction === newDraggingItem ?
