@@ -5,9 +5,8 @@ import { ButtonsSkeleton, IngredientsSkeleton, InstructionsSkeleton, RecipeSumma
 import Breadcrumbs from '@/app/ui/recipes/breadcrumbs';
 import { Suspense } from 'react';
 import { ScheduleRecipe, DeleteRecipe ,ExportRecipe } from '@/app/ui/recipes/recipe-display/buttons';
-import { fetchIngredientNamesByID, fetchInstructionNamesByID, fetchMeasurementPerms, fetchRecipeById } from '@/app/lib/data';
+import { fetchIngredientNamesByID, fetchInstructionNamesByID, fetchRecipeById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
-import { unstable_noStore as noStore } from 'next/cache';
 
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -39,17 +38,17 @@ export default async function Page({ params }: { params: { id: string } }) {
       </div>
       </div>
         <div className="mt-6 grid grid-rows-1 gap-6 flex w-full">
-            {/* <Suspense fallback={<RecipeSummarySkeleton />}> */}
+            <Suspense fallback={<RecipeSummarySkeleton />}>
             <RecipeSummary recipe={recipe}/>
-            {/* </Suspense> */}
+            </Suspense>
         <div className='mt-6 grid grid-cols-3 gap-6'>
-            {/* <Suspense fallback={<IngredientsSkeleton />}> */}
+            <Suspense fallback={<IngredientsSkeleton />}>
             <Ingredients names={ingredientNames} modifier = {recipe.modifier} recipe_id={recipe.id} />
-            {/* </Suspense> */}
+            </Suspense>
           
-            {/* <Suspense fallback={<InstructionsSkeleton />}> */}
+            <Suspense fallback={<InstructionsSkeleton />}>
             <Instructions names={instructionNames} recipe_id={recipe.id}/>
-            {/* </Suspense> */}
+            </Suspense>
         </div>
         </div>
       </main>

@@ -1,26 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { InstructionsTable } from './definitions';
 
-
-export const formatDateToLocal = (
-  dateStr: string,
-  locale: string = 'en-US',
-) => {
-  const date = new Date(dateStr);
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
-};
-
 export function amountUpperBoundary(n: number, modifier: number): string {
   if (n == undefined || n == 0) {
     return "";
   } else return "- " + numberToFractionString(n * modifier) + "";
 }
+
 const acceptableDenominators = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const maxDistanceToNumerator = 0.0001;
 
@@ -101,16 +87,14 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 
 export function getInstructionSet(id: string, list_reference: string, formData: FormData): 
 [InstructionsTable[], InstructionsTable[], InstructionsTable[], string, string] {
-  let deleteSets = []
-  let createSets = []
-  let updateSets = []
+  let instructionsToDelete = []
+  let instructionsToCreate = []
+  let instructionsToUpdate = []
   let name = ""
-  console.log(formData)
   const contextPattern = new RegExp(/context-(\d+)-(.*)/);
   const deletePattern = new RegExp(/deleted-(\d+)/)
   let context = null
   let deleteContext = null
-  console.log("prevalidate")
   for (let [key, val] of formData.entries()) {
     context = contextPattern.exec(key)
     console.log(key,val)
@@ -125,7 +109,7 @@ export function getInstructionSet(id: string, list_reference: string, formData: 
           }
         }
       } else {
-        deleteSets.push({
+        instructionsToDelete.push({
             id: '0',
             context: '',
             position: parseInt(deleteContext[1]),
@@ -135,7 +119,7 @@ export function getInstructionSet(id: string, list_reference: string, formData: 
       }
     } else {
       if (context[2] == '0') {
-        createSets.push({
+        instructionsToCreate.push({
           id: uuidv4(),
           context: value,
           position: parseInt(context[1]),
@@ -143,7 +127,7 @@ export function getInstructionSet(id: string, list_reference: string, formData: 
           recipe_id: id
         })
       } else {
-        updateSets.push({
+        instructionsToUpdate.push({
           id: context[2],
           context: value,
           position: parseInt(context[1]),
@@ -153,6 +137,6 @@ export function getInstructionSet(id: string, list_reference: string, formData: 
       }
     }
   }
-  return [deleteSets, updateSets, createSets, name, list_reference]
+  return [instructionsToDelete, instructionsToUpdate, instructionsToCreate, name, list_reference]
 
 }

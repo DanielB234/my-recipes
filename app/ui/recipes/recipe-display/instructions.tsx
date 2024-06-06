@@ -171,10 +171,10 @@ export function InstructionsBySection({
     };
 
     const onHandleSubmit = (e: any) => {
-        const [deleteSets, updateSets, createSets, new_name, new_list_reference] = getInstructionSet(recipe_id, name.list_reference, new FormData(e.target))
+        const [instructionsToDelete, instructionsToUpdate, instructionsToCreate, new_name, new_list_reference] = getInstructionSet(recipe_id, name.list_reference, new FormData(e.target))
         e.preventDefault();
-        updateInstructionSetWithId(recipe_id, new_name, new_list_reference, deleteSets, updateSets, createSets, name.list_reference==='0').then(res => setEditing(false))
-        // .then(resp => setInstructionSet(updateSets.concat(createSets))).then(res => setInstructionSetName(new_name))
+        updateInstructionSetWithId(recipe_id, new_name, new_list_reference, instructionsToDelete, instructionsToUpdate, instructionsToCreate, name.list_reference==='0').then(res => setEditing(false))
+        // .then(resp => setInstructionSet(instructionsToUpdate.concat(instructionsToCreate))).then(res => setInstructionSetName(new_name))
             
         
     }

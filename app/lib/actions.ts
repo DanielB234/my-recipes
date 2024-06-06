@@ -173,9 +173,9 @@ export async function updateInstructionSet(
   id: string,
   name: string, 
   list_reference: string, 
-  deleteSets: InstructionsTable[], 
-  updateSets: InstructionsTable[], 
-  createSets: InstructionsTable[], 
+  instructionsToDelete: InstructionsTable[], 
+  instructionsToUpdate: InstructionsTable[], 
+  instructionsToCreate: InstructionsTable[], 
   new_list_reference: boolean) {
   try {
     if (new_list_reference) {
@@ -183,13 +183,13 @@ export async function updateInstructionSet(
     } else {
       await updateListReference(name, list_reference)
     }
-    for (let instruction of createSets) {
+    for (let instruction of instructionsToCreate) {
       await createNewInstruction(instruction.context, instruction.list_reference, instruction.position, instruction.recipe_id, instruction.id)
     }
-    for (let instruction of updateSets) {
+    for (let instruction of instructionsToUpdate) {
       await updateInstruction(instruction.context, instruction.list_reference, instruction.id, instruction.position)
     }
-    for (let instruction of deleteSets) {
+    for (let instruction of instructionsToDelete) {
       await deleteInstruction(instruction.list_reference, instruction.position)
     }
   } catch (error) {
